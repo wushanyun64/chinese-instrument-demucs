@@ -1,0 +1,1 @@
+This directory tracks the active working directory / backend workspace used by training and inference. It is excluded from git.

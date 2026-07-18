@@ -1,0 +1,7 @@
+# Dataset config for Chinese flute training
+# Do not edit vendored base configs — this override lives in our repo
+# Usage: dora run -d model=htdemucs dset=flute variant=flute_ft
+
+dset:
+  wav: /abs/path/to/data/flute_dataset
+  sources: ['chinese-flute', 'other']

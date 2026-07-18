@@ -1,0 +1,18 @@
+# Fine-tune variant for Chinese flute separator
+# Warm-starts from pretrained htdemucs (4→2 source reinit)
+
+optim:
+  lr: 1e-4          # modest LR for warm-start fine-tuning
+
+dset:
+  segment: 8.0       # segment length in seconds
+  batch_size: 8      # adjust for GPU VRAM
+
+augment:
+  # Demucs remix augmentation — shuffles stems across batch
+  remix: true
+  shift: true        # random shift
+  shift_same: false
+  pitch: true        # random pitch shift
+  pitch_tempo: false # don't tie pitch+tempo
+  gain: true         # random gain per source

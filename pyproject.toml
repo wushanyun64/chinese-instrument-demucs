@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chinese-flute-demucs"
+version = "0.1.0"
+description = "Single-target Demucs source separator for Chinese flute (dizi/xiao/bawu)"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+dependencies = [
+    "torch>=2.0",
+    "torchaudio>=2.0",
+    "dora-search",
+    "hydra-core",
+    "soundfile>=0.12",
+    "julius",
+    "museval>=0.4",
+    "numpy",
+    "librosa>=0.10",
+]
+
+[project.optional-dependencies]
+dev = [
+    "jupyter",
+    "ipykernel",
+    "nbmake",
+    "matplotlib",
+    "mkdocs-material",
+    "mkdocstrings[python]",
+    "mkdocs-jupyter",
+    "pytest",
+]
+docs = [
+    "mkdocs-material",
+    "mkdocstrings[python]",
+    "mkdocs-jupyter",
+]
+
+[tool.setuptools.packages.find]
+include = ["data_pipeline*", "training*", "inference*", "eval*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"

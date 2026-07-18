@@ -1,0 +1,51 @@
+# Data directories (large, user-supplied)
+data/
+outputs/
+release_models/
+metadata/
+
+# Dora experiment outputs
+outputs/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Conda
+*.tar.bz2
+conda-bld/
+
+# torch/hydra
+lightning_logs/
+*.ckpt
+
+# mkdocs
+site/
+
+# Mac
+.DS_Store

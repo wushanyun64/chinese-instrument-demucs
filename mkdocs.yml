@@ -1,0 +1,33 @@
+site_name: Chinese Flute Demucs
+site_description: Single-target Demucs source separator for Chinese flute
+repo_url: https://github.com/jason-sun/chinese-flute-demucs
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - content.code.copy
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true
+            show_root_heading: true
+  - mkdocs-jupyter:
+      execute: false
+      include_source: true
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Concepts: concepts.md
+  - Data: data.md
+  - Training: training.md
+  - Inference: inference.md
+  - Evaluation: evaluation.md
+  - Troubleshooting: troubleshooting.md
+  - FAQ: faq.md
+  - API Reference: api/
