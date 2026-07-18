@@ -3,14 +3,16 @@
 ## Prerequisites
 
 - NVIDIA GPU with CUDA 11.8+
-- [Conda](https://docs.conda.io/en/latest/miniconda.html) (recommended)
+- [uv](https://docs.astral.sh/uv/) (Python package manager)
 
 ## Setup
 
 ```bash
-# Create environment
+# Create environment + install all deps
 make env
-conda activate chinese-flute-demucs
+
+# Activate (or use uv run <command>)
+source .venv/bin/activate
 
 # Verify
 make env-verify
@@ -19,15 +21,25 @@ make env-verify
 Expected output:
 ```
 CUDA available: True
-demucs version: ...
+demucs import OK
+```
+
+## Manual setup (without make)
+
+```bash
+uv venv
+uv pip install -e ".[dev]"
 ```
 
 ## Vendored Demucs
 
-This repo vendors `facebookresearch/demucs` (archived 2025-01-01) as a git submodule:
+This repo vendors `facebookresearch/demucs` (archived 2025-01-01) directly in `vendor/demucs/`.
+It is imported as a local package; no separate `pip install demucs` is needed.
+
+All commands set `PYTHONPATH=vendor/demucs` so the vendored package is discoverable.
+
+## Running without activating the venv
 
 ```bash
-git submodule update --init --recursive
+uv run --with-editable . python -c "import torch; print(torch.cuda.is_available())"
 ```
-
-The vendored demucs is imported as a local package; no separate `pip install demucs` is needed.

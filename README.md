@@ -17,9 +17,9 @@ Takes any song → outputs an isolated Chinese flute track.
 ## Quickstart
 
 ```bash
-# 1. Environment
+# 1. Environment (uses uv)
 make env
-conda activate chinese-flute-demucs
+source .venv/bin/activate
 
 # 2. Build synthetic dataset
 make build-data
