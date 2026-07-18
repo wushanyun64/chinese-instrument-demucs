@@ -40,6 +40,9 @@ Thumbs.db
 *.tar.bz2
 conda-bld/
 
+# uv lock (generated, not committed)
+uv.lock
+
 # torch/hydra
 lightning_logs/
 *.ckpt

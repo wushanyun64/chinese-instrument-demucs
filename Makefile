@@ -16,7 +16,7 @@ build-data:
 	PYTHONPATH=vendor/demucs $(PYTHON) data_pipeline/build_dataset.py
 
 validate-data:
-	PYTHONPATH=vendor/demucs $(PYTHON) data_pipeline/validate_flute_free.py backgrounds/
+	PYTHONPATH=vendor/demucs $(PYTHON) data_pipeline/validate_contamination.py backgrounds/
 
 train:
 	bash training/train.sh
