@@ -3,10 +3,10 @@
 ## CLI (via vendored demucs)
 
 ```bash
-python -m demucs --repo ./release_models -n SIG --two-stems chinese-flute input.wav
+python -m demucs --repo ./release_models -n SIG --two-stems chinese-instrument input.wav
 ```
 
-Outputs: `chinese-flute.wav` and `no_chinese-flute.wav`. Keep the flute stem.
+Outputs: `chinese-instrument.wav` and `no_chinese-instrument.wav`. Keep the target instrument stem.
 
 ## Python wrapper
 

@@ -1,8 +1,7 @@
-"""Audio utilities for the Chinese flute dataset synthesis pipeline.
+"""Audio utilities for the training dataset synthesis pipeline.
 
 Provides loudness normalization, resampling, stereo upmixing, SNR-based
-mixing, and light augmentation — all operating on torch tensors at 44.1 kHz.
-"""
+mixing, and light augmentation — all operating on torch tensors at 44.1 kHz."""
 
 from __future__ import annotations
 
@@ -90,34 +89,34 @@ def loudness_normalize(wav: torch.Tensor, target_db: float = -20.0) -> torch.Ten
 
 
 def mix_at_snr(
-    flute: torch.Tensor, other: torch.Tensor, snr_db: float
+    signal: torch.Tensor, other: torch.Tensor, snr_db: float
 ) -> torch.Tensor:
-    """Mix *flute* and *other* at the given signal-to-noise ratio.
+    """Mix *signal* and *other* at the given signal-to-noise ratio.
 
     Parameters
     ----------
-    flute : (channels, samples)
+    signal : (channels, samples)
         The "signal" whose power defines the reference.
     other : (channels, samples)
-        The "noise" component (must have the same shape as *flute*).
+        The "noise" component (must have the same shape as *signal*).
     snr_db : float
-        Desired SNR in dB.  Positive = flute louder; negative = other louder.
+        Desired SNR in dB.  Positive = signal louder; negative = other louder.
 
     Returns
     -------
     mixture : (channels, samples)
-        ``mixture = flute + scaled_other`` where ``scaled_other`` is adjusted
+        ``mixture = signal + scaled_other`` where ``scaled_other`` is adjusted
         so the power ratio matches *snr_db*.
     """
-    p_signal = flute.square().mean()
+    p_signal = signal.square().mean()
     p_noise = other.square().mean()
     if p_noise < 1e-10:
-        return flute + other  # silence background
+        return signal + other  # silence background
     # SNR = 10 * log10(P_signal / (a^2 * P_noise))
     # => a = sqrt(P_signal / (P_noise * 10^(SNR/10)))
     a_squared = p_signal / (p_noise * (10 ** (snr_db / 10.0)))
     scale = a_squared.sqrt()
-    return flute + scale * other
+    return signal + scale * other
 
 
 # ---------------------------------------------------------------------------

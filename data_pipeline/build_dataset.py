@@ -1,17 +1,17 @@
-r"""Synthesize a ``[chinese-flute, other]`` wav dataset for Demucs training.
+r"""Synthesize a ``[<instrument>, other]`` wav dataset for Demucs training.
 
-Builds mixtures by overlaying isolated flute recordings onto flute-free
-background music:
+Builds mixtures by overlaying isolated instrument recordings onto
+instrument-free background music:
 
-    mixture = gain_f * flute + gain_o * other
+    mixture = gain_s * source + gain_o * other
 
 Output format (Demucs wav dataset convention)::
 
-    data/flute_dataset/
+    data/instrument_dataset/
     ├── train/
     │   ├── 000001/
     │   │   ├── mixture.wav
-    │   │   ├── chinese-flute.wav
+    │   │   ├── <instrument>.wav
     │   │   └── other.wav
     │   └── ...
     └── valid/
@@ -22,9 +22,10 @@ All audio: **44.1 kHz, stereo, float**.
 Usage::
 
     python data_pipeline/build_dataset.py \
-        --flute-dir flute_clips/ \
+        --source-dir erhu_clips/ \
         --bg-dir backgrounds/ \
-        --out data/flute_dataset \
+        --source-name erhu \
+        --out data/instrument_dataset \
         --num-train 500 --num-valid 50 \
         --seg-len 8 --snr-min -5 --snr-max 10
 """
@@ -68,100 +69,103 @@ def collect_audio_files(directory: Path, extensions: set[str] | None = None) -> 
 
 
 def build_track(
-    flute_file: Path,
+    source_file: Path,
     bg_file: Path,
     seg_samples: int,
     snr_db: float,
-    augment_flute: bool = True,
+    source_name: str = "chinese-instrument",
+    augment_source: bool = True,
     augment_bg: bool = False,
-    flute_gain_db: float = -20.0,
+    source_gain_db: float = -20.0,
     bg_gain_db: float = -20.0,
 ) -> dict[str, torch.Tensor]:
-    """Build a single ``{mixture, chinese-flute, other}`` track.
+    """Build a single ``{mixture, <source_name>, other}`` track.
 
     Parameters
     ----------
-    flute_file : Path
-        Isolated flute recording.
+    source_file : Path
+        Isolated instrument recording.
     bg_file : Path
-        Flute-free background music.
+        Instrument-free background music.
     seg_samples : int
         Number of samples for the output segment.
     snr_db : float
-        Target SNR (positive = flute louder).
-    augment_flute, augment_bg : bool
+        Target SNR (positive = source louder).
+    source_name : str
+        Name of the target instrument (used as stem filename).
+    augment_source, augment_bg : bool
         Whether to apply light pitch/time/gain augmentation.
-    flute_gain_db, bg_gain_db : float
+    source_gain_db, bg_gain_db : float
         Reference loudness targets before mixing.
 
     Returns
     -------
-    dict with keys ``"chinese-flute"``, ``"other"``, ``"mixture"`` —
+    dict with keys ``source_name``, ``"other"``, ``"mixture"`` —
     each a ``(2, seg_samples)`` float tensor.
     """
     # Load & normalize format
-    flute = ensure_stereo(load_audio(flute_file))
+    source = ensure_stereo(load_audio(source_file))
     bg = ensure_stereo(load_audio(bg_file))
 
     # Take a random common-length segment
-    min_len = min(flute.size(-1), bg.size(-1))
+    min_len = min(source.size(-1), bg.size(-1))
     if min_len < seg_samples:
-        flute = ensure_length(flute, seg_samples)
+        source = ensure_length(source, seg_samples)
         bg = ensure_length(bg, seg_samples)
         start_frame = 0
     else:
         start_frame = random.randint(0, min_len - seg_samples)
-        flute = flute[:, start_frame : start_frame + seg_samples]
+        source = source[:, start_frame : start_frame + seg_samples]
         bg = bg[:, start_frame : start_frame + seg_samples]
 
     # Loudness normalize each to a consistent reference
-    flute = loudness_normalize(flute, target_db=flute_gain_db)
+    source = loudness_normalize(source, target_db=source_gain_db)
     bg = loudness_normalize(bg, target_db=bg_gain_db)
 
     # Light augmentation (Demucs does heavier remix at train time)
-    if augment_flute:
-        flute = pitch_shift(flute, n_steps=random.choice([0, 0, 0, -2, 2]))
+    if augment_source:
+        source = pitch_shift(source, n_steps=random.choice([0, 0, 0, -2, 2]))
         if random.random() < 0.3:
-            flute = time_stretch(flute, rate=random.uniform(0.9, 1.1))
-        flute = random_gain(flute, db_range=(-3.0, 3.0))
+            source = time_stretch(source, rate=random.uniform(0.9, 1.1))
+        source = random_gain(source, db_range=(-3.0, 3.0))
     if augment_bg:
         bg = random_gain(bg, db_range=(-3.0, 3.0))
 
     # Ensure common length after augmentation
-    flute = ensure_length(flute, seg_samples)
+    source = ensure_length(source, seg_samples)
     bg = ensure_length(bg, seg_samples)
 
     # Mix
-    mixture = mix_at_snr(flute, bg, snr_db)
+    mixture = mix_at_snr(source, bg, snr_db)
 
-    # The plan's invariant: mixture == chinese-flute + other sample-exact.
-    # "other" must be the ACTUAL background component in the mixture,
-    # not the raw background.  Recover it from the mixture.
-    other_component = mixture - flute
+    # The plan's invariant: mixture == <source> + other sample-exact.
+    # "other" must be the ACTUAL background component in the mixture.
+    other_component = mixture - source
 
     return {
-        "chinese-flute": flute,
+        source_name: source,
         "other": other_component,
         "mixture": mixture,
     }
 
 
 def build_dataset(
-    flute_dir: Path,
+    source_dir: Path,
     bg_dir: Path,
     out_dir: Path,
+    source_name: str = "chinese-instrument",
     num_train: int = 500,
     num_valid: int = 50,
     seg_len: float = 8.0,
     snr_min: float = -5.0,
     snr_max: float = 10.0,
-    flute_gain_db: float = -20.0,
+    source_gain_db: float = -20.0,
     bg_gain_db: float = -20.0,
     seed: int = 42,
 ) -> None:
     """Main synthesis entry-point.
 
-    Split is by **source clip identity**: each flute file contributes to
+    Split is by **source clip identity**: each source file contributes to
     either train XOR valid, not both.
     """
     random.seed(seed)
@@ -170,41 +174,41 @@ def build_dataset(
 
     seg_samples = int(seg_len * SAMPLE_RATE)
 
-    flute_files = collect_audio_files(flute_dir)
+    source_files = collect_audio_files(source_dir)
     bg_files = collect_audio_files(bg_dir)
 
-    if len(flute_files) < 2:
-        raise RuntimeError(f"Need ≥ 2 flute clips; found {len(flute_files)}")
+    if len(source_files) < 2:
+        raise RuntimeError(f"Need ≥ 2 source clips; found {len(source_files)}")
     if len(bg_files) < 2:
         raise RuntimeError(f"Need ≥ 2 background clips; found {len(bg_files)}")
 
-    # Split flute files by identity
-    random.shuffle(flute_files)
-    split = max(1, len(flute_files) // 5)
-    train_flutes = flute_files[split:]
-    valid_flutes = flute_files[:split]
+    # Split source files by identity
+    random.shuffle(source_files)
+    split = max(1, len(source_files) // 5)
+    train_sources = source_files[split:]
+    valid_sources = source_files[:split]
 
     random.shuffle(bg_files)
     train_bgs = bg_files[split:]
     valid_bgs = bg_files[:split]
 
     print(
-        f"Flute clips: {len(flute_files)} total → "
-        f"{len(train_flutes)} train / {len(valid_flutes)} valid"
+        f"Source clips ({source_name}): {len(source_files)} total → "
+        f"{len(train_sources)} train / {len(valid_sources)} valid"
     )
     print(
         f"Backgrounds: {len(bg_files)} total → "
         f"{len(train_bgs)} train / {len(valid_bgs)} valid"
     )
 
-    for split_name, flutes, bgs, n_tracks in [
-        ("train", train_flutes, train_bgs, num_train),
-        ("valid", valid_flutes, valid_bgs, num_valid),
+    for split_name, sources, bgs, n_tracks in [
+        ("train", train_sources, train_bgs, num_train),
+        ("valid", valid_sources, valid_bgs, num_valid),
     ]:
         split_dir = out_dir / split_name
         split_dir.mkdir(parents=True, exist_ok=True)
 
-        flute_cycle = itertools.cycle(flutes)
+        source_cycle = itertools.cycle(sources)
         bg_cycle = itertools.cycle(bgs)
 
         for idx in range(n_tracks):
@@ -213,15 +217,16 @@ def build_dataset(
 
             snr_db = random.uniform(snr_min, snr_max)
             stems = build_track(
-                flute_file=next(flute_cycle),
+                source_file=next(source_cycle),
                 bg_file=next(bg_cycle),
                 seg_samples=seg_samples,
                 snr_db=snr_db,
-                flute_gain_db=flute_gain_db,
+                source_name=source_name,
+                source_gain_db=source_gain_db,
                 bg_gain_db=bg_gain_db,
             )
 
-            # Write stems (order: flute, other, mixture with sample-exact sum guarantee)
+            # Write stems
             for name, wav in stems.items():
                 save_audio(wav, track_dir / f"{name}.wav")
 
@@ -232,16 +237,18 @@ def build_dataset(
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Synthesize Chinese-flute Demucs dataset")
-    p.add_argument("--flute-dir", required=True, type=Path, help="Isolated flute clips")
-    p.add_argument("--bg-dir", required=True, type=Path, help="Flute-free background music")
-    p.add_argument("--out", default=Path("data/flute_dataset"), type=Path)
+    p = argparse.ArgumentParser(description="Synthesize instrument Demucs dataset")
+    p.add_argument("--source-dir", required=True, type=Path, help="Isolated instrument clips")
+    p.add_argument("--source-name", default="chinese-instrument", type=str,
+                   help="Target instrument name for stem filenames (default: chinese-instrument)")
+    p.add_argument("--bg-dir", required=True, type=Path, help="Instrument-free background music")
+    p.add_argument("--out", default=Path("data/instrument_dataset"), type=Path)
     p.add_argument("--num-train", default=500, type=int)
     p.add_argument("--num-valid", default=50, type=int)
     p.add_argument("--seg-len", default=8.0, type=float, help="Segment length in seconds")
     p.add_argument("--snr-min", default=-5.0, type=float)
     p.add_argument("--snr-max", default=10.0, type=float)
-    p.add_argument("--flute-gain-db", default=-20.0, type=float)
+    p.add_argument("--source-gain-db", default=-20.0, type=float)
     p.add_argument("--bg-gain-db", default=-20.0, type=float)
     p.add_argument("--seed", default=42, type=int)
     return p.parse_args(argv)
@@ -250,15 +257,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 if __name__ == "__main__":
     args = parse_args()
     build_dataset(
-        flute_dir=args.flute_dir,
+        source_dir=args.source_dir,
         bg_dir=args.bg_dir,
         out_dir=args.out,
+        source_name=args.source_name,
         num_train=args.num_train,
         num_valid=args.num_valid,
         seg_len=args.seg_len,
         snr_min=args.snr_min,
         snr_max=args.snr_max,
-        flute_gain_db=args.flute_gain_db,
+        source_gain_db=args.source_gain_db,
         bg_gain_db=args.bg_gain_db,
         seed=args.seed,
     )

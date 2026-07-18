@@ -17,8 +17,8 @@ REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 # ---- Config ------------------------------------------------------------
 DORA_ARGS="-d"                   # -d = all GPUs
 MODEL="htdemucs"
-DSET="flute"
-VARIANT="flute_ft"
+DSET="instrument"
+VARIANT="instrument_ft"
 # ------------------------------------------------------------------------
 
 cd "$REPO_ROOT"

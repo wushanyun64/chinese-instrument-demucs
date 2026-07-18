@@ -1,1 +1,1 @@
-""""Single-target Demucs source separator for Chinese flute."""
+""""Single-target Demucs source separator for Chinese instruments."""

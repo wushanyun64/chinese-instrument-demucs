@@ -1,16 +1,16 @@
-# Chinese Flute Stem Separator (Demucs)
+# Chinese Instrument Stem Separator (Demucs)
 
-A **single-target source separator** based on Demucs that extracts Chinese flute
+A **single-target source separator** based on Demucs that extracts Chinese instrument
 (dizi, xiao, bawu) stems from arbitrary music mixtures.
 
 ## What it does
 
-Takes any song → outputs an isolated Chinese flute track.
+Takes any song → outputs an isolated Chinese instrument track.
 
 ## Design
 
-- **Two-source model** (`chinese-flute`, `other`) where `other = mixture − flute`
-- **Synthetic data pipeline** — mixtures built on-the-fly from isolated flute clips + flute-free backgrounds
+- **Two-source model** (`chinese-instrument`, `other`) where `other = mixture − target instrument`
+- **Synthetic data pipeline** — mixtures built on-the-fly from isolated target instrument clips + target instrument-free backgrounds
 - **Warm-start from pretrained `htdemucs`** with reinitialized output head (4→2 sources)
 - **Orchestrated via Dora + Hydra** for reproducible experiments
 

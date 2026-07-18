@@ -59,7 +59,7 @@ def evaluate_dir(
         )
         # Load estimated and reference
         est_data, sr_est = sf.read(str(est_path))
-        ref_path = fp.with_suffix(".flute.wav")  # convention: ground-truth flute stem
+        ref_path = fp.with_suffix(".stem.wav")  # convention: ground-truth instrument stem
         if not ref_path.exists():
             print(f"  Skipping {fp.name}: no ground-truth {ref_path.name}")
             continue
@@ -88,9 +88,9 @@ def evaluate_dir(
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Evaluate flute separation model")
+    p = argparse.ArgumentParser(description="Evaluate instrument separation model")
     p.add_argument("--test-dir", type=Path, required=True,
-                   help="Directory with real test mixtures + ground-truth .flute.wav stems")
+                   help="Directory with real test mixtures + ground-truth .stem.wav stems")
     p.add_argument("--sig", required=True, help="Model experiment signature")
     p.add_argument("--repo", type=Path, default=Path("release_models"))
     p.add_argument("--device", default="cuda", choices=["cuda", "cpu"])

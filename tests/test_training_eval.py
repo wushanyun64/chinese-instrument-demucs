@@ -23,12 +23,12 @@ class TestPatchCheckpoint:
     def test_build_model_smoke(self):
         """Smoke test: building a 2-source HTDemucs should succeed."""
         from demucs.htdemucs import HTDemucs
-        model = HTDemucs(sources=["chinese-flute", "other"], channels=4)
+        model = HTDemucs(sources=["chinese-instrument", "other"], channels=4)
         assert model is not None
         state = model.state_dict()
         assert len(state) > 0
         # Verify model has the right source count
-        assert model.sources == ["chinese-flute", "other"]
+        assert model.sources == ["chinese-instrument", "other"]
 
     def test_load_and_patch_pure_cpu(self, tmp_path: Path):
         """Test that patching from a locally built model works (no network)."""
@@ -39,7 +39,7 @@ class TestPatchCheckpoint:
         # We can't call get_model() without network, so we mock by building
         # a 4-source and a 2-source and comparing key sets.
         pretrained = HTDemucs(sources=["drums", "bass", "other", "vocals"], channels=4)
-        target = HTDemucs(sources=["chinese-flute", "other"], channels=4)
+        target = HTDemucs(sources=["chinese-instrument", "other"], channels=4)
 
         pretrained_state = pretrained.state_dict()
         target_state = target.state_dict()
@@ -68,7 +68,7 @@ class TestPatchCheckpoint:
         from demucs.htdemucs import HTDemucs
 
         m4 = HTDemucs(sources=["drums", "bass", "other", "vocals"], channels=4)
-        m2 = HTDemucs(sources=["chinese-flute", "other"], channels=4)
+        m2 = HTDemucs(sources=["chinese-instrument", "other"], channels=4)
 
         s4 = m4.state_dict()
         s2 = m2.state_dict()

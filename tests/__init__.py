@@ -1,1 +1,1 @@
-"""Tests for chinese-flute-demucs."""
+"""Tests for chinese-instrument-demucs."""

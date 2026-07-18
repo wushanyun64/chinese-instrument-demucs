@@ -2,9 +2,9 @@
 
 ## Input requirements
 
-### Flute clips (`flute_clips/`)
+### Instrument clips (`target source_clips/`)
 
-Isolated Chinese flute recordings. **Diversity is the priority:**
+Isolated Chinese instrument recordings. **Diversity is the priority:**
 - Multiple instruments: dizi, xiao, bawu
 - Multiple players, keys, articulations
 - Various recording conditions
@@ -12,17 +12,17 @@ Isolated Chinese flute recordings. **Diversity is the priority:**
 
 ### Backgrounds (`backgrounds/`)
 
-Music containing **no flute** — any genre. Sources: MUSDB18-HQ mixtures,
+Music containing **no target instrument** — any genre. Sources: MUSDB18-HQ mixtures,
 royalty-free libraries, own collection.
 
 ## Output format
 
 ```
-data/flute_dataset/
+data/target instrument_dataset/
 ├── train/
 │   ├── 000001/
 │   │   ├── mixture.wav
-│   │   ├── chinese-flute.wav
+│   │   ├── chinese-instrument.wav
 │   │   └── other.wav
 │   └── ...
 └── valid/
@@ -34,12 +34,12 @@ All audio: **44.1 kHz, stereo, float**.
 ## Synthesis pipeline
 
 See `data_pipeline/build_dataset.py` for the full pipeline. Key steps:
-1. Sample flute + background clips; take a common-length segment (7–11 s)
+1. Sample target instrument + background clips; take a common-length segment (7–11 s)
 2. Loudness-normalize each, then mix at randomized SNR (−5 to +10 dB)
 3. Apply light augmentation (pitch shift, time stretch, random gain)
-4. Write `chinese-flute.wav`, `other.wav`, `mixture.wav = flute + other`
+4. Write `chinese-instrument.wav`, `other.wav`, `mixture.wav = target instrument + other`
 
 ## Guardrails
 
 - Train/valid split by **source clip identity** (prevents leakage)
-- Background verification pass flags flute-contaminated files (`validate_flute_free.py`)
+- Background verification pass flags target instrument-contaminated files (`validate_target instrument_free.py`)

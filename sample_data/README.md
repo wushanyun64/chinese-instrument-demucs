@@ -5,8 +5,8 @@ quickstart run with zero external downloads.
 
 ## Contents (to be added)
 
-- `flute_sample.wav` — a short isolated Chinese flute clip
-- `bg_sample.wav` — a short flute-free background clip
+- `target instrument_sample.wav` — a short isolated Chinese instrument clip
+- `bg_sample.wav` — a short target instrument-free background clip
 - `mixture_sample.wav` — a short real-mixture test clip
 
 ## Creating synthetic test clips

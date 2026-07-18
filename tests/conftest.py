@@ -1,4 +1,4 @@
-"""Pytest configuration for chinese-flute-demucs.
+"""Pytest configuration for chinese-instrument-demucs.
 
 Adds the vendored demucs to sys.path so imports work.
 """

@@ -1,10 +1,9 @@
-"""Flag background audio that may contain flute — a guardrail against contamination.
+"""Flag background audio that may contain the target instrument — a guardrail against contamination.
 
 Contaminated backgrounds poison the ``other`` target during training, teaching
-the model to leave flute in the wrong stem.  This script runs a simple
-spectral heuristic (flute-band energy ratio) and/or the base pretrained
-htdemucs to surface suspicious files for manual review.
-"""
+the model to leave instrument signal in the wrong stem.  This script runs a simple
+spectral heuristic (midrange energy ratio) and/or the base pretrained
+htdemucs to surface suspicious files for manual review."""
 
 from __future__ import annotations
 
@@ -19,13 +18,14 @@ import torch
 
 SAMPLE_RATE: int = 44100
 
-# Rough flute fundamental + strong harmonic region (Hz)
-FLUTE_BAND_LO: float = 400.0
-FLUTE_BAND_HI: float = 5000.0
+# Rough instrument midrange — covers most Chinese instruments (erhu, pipa, dizi, etc.)
+# Adjust these bounds for very low (bass) or very high instruments.
+INSTRUMENT_BAND_LO: float = 400.0
+INSTRUMENT_BAND_HI: float = 5000.0
 
 
-def _flute_band_ratio(wav: torch.Tensor, sr: int = SAMPLE_RATE) -> float:
-    """Ratio of energy in [FLUTE_BAND_LO, FLUTE_BAND_HI] to total energy."""
+def _instrument_band_ratio(wav: torch.Tensor, sr: int = SAMPLE_RATE) -> float:
+    """Ratio of energy in [INSTRUMENT_BAND_LO, INSTRUMENT_BAND_HI] to total energy."""
     n_fft = 2048
     # Convert to 1D mono: if multi-channel, mean across channels
     if wav.ndim > 1:
@@ -44,8 +44,8 @@ def _flute_band_ratio(wav: torch.Tensor, sr: int = SAMPLE_RATE) -> float:
     power = spec.abs().square()
     freqs = torch.fft.rfftfreq(n_fft, 1.0 / sr)
 
-    lo_idx = (freqs >= FLUTE_BAND_LO).nonzero(as_tuple=True)[0][0].item()
-    hi_idx = (freqs <= FLUTE_BAND_HI).nonzero(as_tuple=True)[0][-1].item() + 1
+    lo_idx = (freqs >= INSTRUMENT_BAND_LO).nonzero(as_tuple=True)[0][0].item()
+    hi_idx = (freqs <= INSTRUMENT_BAND_HI).nonzero(as_tuple=True)[0][-1].item() + 1
 
     band_power = power[lo_idx:hi_idx, :].sum().item()
     total_power = power.sum().item()
@@ -102,7 +102,7 @@ def validate(
         except Exception:
             print(f"Warning: could not load {fp}, skipping", file=sys.stderr)
             continue
-        r = _flute_band_ratio(wav, sr)
+        r = _instrument_band_ratio(wav, sr)
         ratios.append(r)
         file_ratios.append((fp, r))
 

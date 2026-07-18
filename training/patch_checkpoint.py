@@ -6,7 +6,7 @@ that Dora can resume from via ``continue_from``.
 
 Usage::
 
-    python training/patch_checkpoint.py --sources chinese-flute other \\
+    python training/patch_checkpoint.py --sources erhu other \\
         --out outputs/warmstart.th
 """
 
@@ -100,8 +100,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         description="Non-strict warm-start: 4-source htdemucs → N-source model"
     )
     p.add_argument(
-        "--sources", nargs="+", default=["chinese-flute", "other"],
-        help="Target source list (default: chinese-flute other)",
+        "--sources", nargs="+", default=["chinese-instrument", "other"],
+        help="Target source list (default: chinese-instrument other)",
     )
     p.add_argument(
         "--pretrained", default="htdemucs",

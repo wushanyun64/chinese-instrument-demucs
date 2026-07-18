@@ -1,0 +1,7 @@
+# Dataset config for Chinese instrument training
+# Do not edit vendored base configs — this override lives in our repo
+# Usage: dora run -d model=htdemucs dset=instrument variant=instrument_ft
+
+dset:
+  wav: /abs/path/to/data/instrument_dataset
+  sources: ['chinese-instrument', 'other']

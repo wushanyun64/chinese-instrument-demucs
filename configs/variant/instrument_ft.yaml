@@ -1,4 +1,4 @@
-# Fine-tune variant for Chinese flute separator
+# Fine-tune variant for Chinese instrument separator
 # Warm-starts from pretrained htdemucs (4→2 source reinit)
 
 optim:

@@ -1,14 +1,14 @@
-# Chinese Flute Demucs — Documentation
+# Chinese Instrument Demucs — Documentation
 
 ## What this project does
 
-Extracts Chinese flute (dizi, xiao, bawu) stems from arbitrary music mixtures
+Extracts Chinese instrument (dizi, xiao, bawu) stems from arbitrary music mixtures
 using a fine-tuned Demucs model.
 
 ## Quickstart
 
 ```bash
-make env && conda activate chinese-flute-demucs
+make env && conda activate chinese-instrument-demucs
 make build-data
 make train
 make separate INPUT=input.wav
@@ -16,8 +16,8 @@ make separate INPUT=input.wav
 
 ## How it works
 
-- **Single-target, two-source design:** `['chinese-flute', 'other']` where `other = mixture − flute`
-- **Synthetic data:** mixtures built on-the-fly from isolated flute recordings + flute-free backgrounds
+- **Single-target, two-source design:** `['chinese-instrument', 'other']` where `other = mixture − target instrument`
+- **Synthetic data:** mixtures built on-the-fly from isolated target instrument recordings + target instrument-free backgrounds
 - **Warm-start from pretrained htdemucs:** transfers learned audio representations; reinitializes output head (4→2 sources)
 
 ## Where to go next

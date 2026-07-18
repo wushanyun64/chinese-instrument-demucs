@@ -13,33 +13,33 @@ shape-mismatched keys, logs which ones were skipped.
 
 **Symptom:** Training loss oscillates or doesn't converge.
 
-**Cause:** `other.wav` was recomputed lossily after writing `chinese-flute.wav`.
+**Cause:** `other.wav` was recomputed lossily after writing `chinese-instrument.wav`.
 
 **Fix:** Write `other.wav` as the literal background, then write `mixture.wav` as
-`chinese-flute.wav + other.wav` sample-exact. Do not recompute.
+`chinese-instrument.wav + other.wav` sample-exact. Do not recompute.
 
 ## Contaminated backgrounds
 
-**Symptom:** Model leaves flute in `other` output.
+**Symptom:** Model leaves target instrument in `other` output.
 
-**Cause:** Background audio contains flute, teaching the model flute belongs in `other`.
+**Cause:** Background audio contains target instrument, teaching the model target instrument belongs in `other`.
 
-**Fix:** Run `data_pipeline/validate_flute_free.py` on your backgrounds and remove flagged files.
+**Fix:** Run `data_pipeline/validate_target instrument_free.py` on your backgrounds and remove flagged files.
 
-## Overfitting to narrow flute data
+## Overfitting to narrow target instrument data
 
 **Symptom:** Great on synthetic validation, fails on real music.
 
-**Cause:** All flute clips share the same instrument/player/recording condition.
+**Cause:** All target instrument clips share the same instrument/player/recording condition.
 
-**Fix:** Diversify flute clips — multiple instruments (dizi/xiao/bawu), players, keys,
+**Fix:** Diversify target instrument clips — multiple instruments (dizi/xiao/bawu), players, keys,
 articulations, and recording conditions.
 
 ## OOM (Out of Memory)
 
 **Symptom:** `CUDA out of memory` during training.
 
-**Fix:** Reduce `dset.segment` and/or `dset.batch_size` in `configs/variant/flute_ft.yaml`.
+**Fix:** Reduce `dset.segment` and/or `dset.batch_size` in `configs/variant/target instrument_ft.yaml`.
 
 ## Silent / NaN audio
 

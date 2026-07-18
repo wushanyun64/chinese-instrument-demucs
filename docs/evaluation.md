@@ -3,7 +3,7 @@
 ## Metrics
 
 We report **SI-SDR** and **SDR** (via `museval`) on a **held-out real test set** —
-genuine songs with Chinese flute, not synthetic data.
+genuine songs with Chinese instrument, not synthetic data.
 
 ## Running
 
@@ -11,7 +11,7 @@ genuine songs with Chinese flute, not synthetic data.
 make eval
 ```
 
-Prints per-track and mean flute-stem SDR.
+Prints per-track and mean target instrument-stem SDR.
 
 ## Test set
 

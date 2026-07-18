@@ -3,20 +3,20 @@
 ## Why two sources if we only want one?
 
 Demucs's data pipeline and augmentation assume the stems sum to the mixture. A literal
-1-source model would violate this invariant. Instead we define `['chinese-flute', 'other']`
-where `other = mixture − chinese-flute`. We keep the flute output and discard `other`.
+1-source model would violate this invariant. Instead we define `['chinese-instrument', 'other']`
+where `other = mixture − chinese-instrument`. We keep the target instrument output and discard `other`.
 
 ## Synthetic data
 
-Training mixtures are built on-the-fly by overlaying isolated flute recordings onto
-flute-free background music:
+Training mixtures are built on-the-fly by overlaying isolated target instrument recordings onto
+target instrument-free background music:
 
 ```
-mixture = gain_f × flute + gain_o × other
+mixture = gain_f × target instrument + gain_o × other
 ```
 
 This gives effectively unlimited, diverse training data without needing full multitrack
-recordings with isolated flute stems.
+recordings with isolated target instrument stems.
 
 ## Warm-start
 
@@ -27,6 +27,6 @@ are reinitialized for our 2-source task.
 
 ## Sum-to-mixture invariant
 
-For every track: `mixture.wav == chinese-flute.wav + other.wav` sample-exact.
+For every track: `mixture.wav == chinese-instrument.wav + other.wav` sample-exact.
 We write `other` as the literal background used, and `mixture` as their exact sum.
 Any drift corrupts training.

@@ -1,10 +1,9 @@
-"""CLI wrapper for separating Chinese flute from audio using the trained model.
+"""CLI wrapper for separating a target instrument from audio using the trained model.
 
 Usage::
 
-    python inference/separate.py input.wav               # single file
-    python inference/separate.py input_folder/            # batch folder
-    python inference/separate.py input.wav --out flute.wav
+    python inference/separate.py input.wav --sig SIG --stem erhu
+    python inference/separate.py input_folder/ --sig SIG --stem pipa
 """
 
 from __future__ import annotations
@@ -20,11 +19,12 @@ _VENDOR = Path(__file__).resolve().parents[1] / "vendor" / "demucs"
 def separate(
     input_path: Path,
     sig: str,
+    stem: str = "chinese-instrument",
     out_dir: Path | None = None,
     repo: Path | None = None,
     device: str = "cuda",
 ) -> Path:
-    """Run Demucs separation and return the path to the flute stem.
+    """Run Demucs separation and return the path to the target stem.
 
     Parameters
     ----------
@@ -32,6 +32,8 @@ def separate(
         Audio file or directory to process.
     sig : str
         Experiment signature of the trained model.
+    stem : str
+        Target instrument name for ``--two-stems`` (default: ``"chinese-instrument"``).
     out_dir : Path | None
         Output directory (default: ``separated/<sig>/``).
     repo : Path | None
@@ -41,11 +43,11 @@ def separate(
 
     Returns
     -------
-    Path to the extracted ``chinese-flute.wav`` (or the output directory for batch).
+    Path to the extracted ``<stem>.wav`` (or the output directory for batch).
     """
     cmd = [
         sys.executable, "-m", "demucs",
-        "--two-stems", "chinese-flute",
+        "--two-stems", stem,
         "-n", sig,
         "--device", device,
     ]
@@ -66,20 +68,22 @@ def separate(
 
     if input_path.is_file():
         stem_name = input_path.stem
-        flute_path = result_dir / stem_name / "chinese-flute.wav"
-        if flute_path.exists():
-            return flute_path
+        stem_path = result_dir / stem_name / f"{stem}.wav"
+        if stem_path.exists():
+            return stem_path
         # Demucs may use different naming
-        for p in result_dir.rglob("**/chinese-flute.wav"):
+        for p in result_dir.rglob(f"**/{stem}.wav"):
             return p
 
     return result_dir
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Chinese flute stem separator")
+    p = argparse.ArgumentParser(description="Instrument stem separator")
     p.add_argument("input", type=Path, help="Input audio file or directory")
     p.add_argument("--sig", required=True, help="Model experiment signature")
+    p.add_argument("--stem", default="chinese-instrument",
+                   help="Target instrument name for --two-stems (default: chinese-instrument)")
     p.add_argument("--out", type=Path, default=None, help="Output directory")
     p.add_argument("--repo", type=Path, default=Path("release_models"),
                    help="Path to release_models/ (default: release_models/)")
@@ -92,8 +96,9 @@ if __name__ == "__main__":
     result = separate(
         input_path=args.input,
         sig=args.sig,
+        stem=args.stem,
         out_dir=args.out,
         repo=args.repo,
         device=args.device,
     )
-    print(f"Done — flute stem at: {result}")
+    print(f"Done — stem at: {result}")

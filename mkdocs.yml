@@ -1,6 +1,6 @@
-site_name: Chinese Flute Demucs
-site_description: Single-target Demucs source separator for Chinese flute
-repo_url: https://github.com/jason-sun/chinese-flute-demucs
+site_name: Chinese Instrument Demucs
+site_description: Single-target Demucs source separator for Chinese instrument
+repo_url: https://github.com/jason-sun/chinese-instrument-demucs
 theme:
   name: material
   features:
