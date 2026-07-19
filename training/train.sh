@@ -2,7 +2,7 @@
 # Launch Demucs fine-tuning via Dora.
 #
 # Prerequisites:
-#   1. Dataset built:     make build-data
+#   1. Dataset built:     uv run --env PYTHONPATH=vendor/demucs python data_pipeline/build_dataset.py ...
 #   2. Warm-start ready:  python training/patch_checkpoint.py
 #
 # Usage:

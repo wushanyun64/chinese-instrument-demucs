@@ -1,40 +1,44 @@
 .PHONY: env env-verify build-data validate-data train export separate eval test notebooks docs docs-serve clean
 
-PYTHON := .venv/bin/python
 UV := uv
 
+# ---- Primary workflow: use uv directly ----
+#    uv sync                        # create env + install
+#    uv run --env PYTHONPATH=vendor/demucs pytest
+#    uv run --env PYTHONPATH=vendor/demucs python data_pipeline/build_dataset.py ...
+#    bash training/train.sh
+#    uv run --env PYTHONPATH=vendor/demucs python inference/separate.py ...
+#
+# These Makefile targets are convenience wrappers.
+
 env:
-	$(UV) venv --python 3.12
-	$(UV) pip install -e ".[dev]"
-	@echo "✓ Environment ready — activate: source .venv/bin/activate"
+	$(UV) sync
+	@echo "Ready — use: uv run --env PYTHONPATH=vendor/demucs ..."
 
 env-verify:
-	PYTHONPATH=vendor/demucs $(PYTHON) -c "import torch; print('CUDA available:', torch.cuda.is_available())"
-	PYTHONPATH=vendor/demucs $(PYTHON) -c "import demucs; print('demucs import OK')"
+	$(UV) run --env PYTHONPATH=vendor/demucs python -c "import torch; print('CUDA:', torch.cuda.is_available())"
+	$(UV) run --env PYTHONPATH=vendor/demucs python -c "import demucs; print('demucs OK')"
 
 build-data:
-	PYTHONPATH=vendor/demucs $(PYTHON) data_pipeline/build_dataset.py
+	$(UV) run --env PYTHONPATH=vendor/demucs python data_pipeline/build_dataset.py
 
 validate-data:
-	PYTHONPATH=vendor/demucs $(PYTHON) data_pipeline/validate_contamination.py backgrounds/
+	$(UV) run --env PYTHONPATH=vendor/demucs python data_pipeline/validate_contamination.py backgrounds/
 
 train:
 	bash training/train.sh
 
-export:
-	@echo "Usage: python -m tools.export SIG"
-
-separate: inference/separate.py
-	PYTHONPATH=vendor/demucs $(PYTHON) inference/separate.py
+separate:
+	$(UV) run --env PYTHONPATH=vendor/demucs python inference/separate.py
 
 eval:
-	PYTHONPATH=vendor/demucs $(PYTHON) eval/evaluate.py
+	$(UV) run --env PYTHONPATH=vendor/demucs python eval/evaluate.py
 
 test:
-	PYTHONPATH=vendor/demucs $(PYTHON) -m pytest tests/ -v
+	$(UV) run --env PYTHONPATH=vendor/demucs pytest tests/ -v
 
 notebooks:
-	PYTHONPATH=vendor/demucs $(PYTHON) -m pytest --nbmake notebooks/ -v
+	$(UV) run --env PYTHONPATH=vendor/demucs pytest --nbmake notebooks/ -v
 
 docs:
 	$(UV) run mkdocs build --strict

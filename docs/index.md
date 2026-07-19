@@ -2,22 +2,30 @@
 
 ## What this project does
 
-Extracts Chinese instrument (dizi, xiao, bawu) stems from arbitrary music mixtures
+Extracts a target Chinese instrument (erhu, pipa, dizi, etc.) from arbitrary music mixtures
 using a fine-tuned Demucs model.
 
 ## Quickstart
 
 ```bash
-make env && conda activate chinese-instrument-demucs
-make build-data
-make train
-make separate INPUT=input.wav
+# 1. Create environment + install
+uv sync
+
+# 2. Build synthetic dataset (e.g. for erhu)
+uv run --env PYTHONPATH=vendor/demucs python data_pipeline/build_dataset.py \
+    --source-dir erhu_clips/ --bg-dir backgrounds/ --source-name erhu
+
+# 3. Train
+bash training/train.sh
+
+# 4. Separate
+uv run --env PYTHONPATH=vendor/demucs python inference/separate.py input.wav --sig <SIG> --stem erhu
 ```
 
 ## How it works
 
-- **Single-target, two-source design:** `['chinese-instrument', 'other']` where `other = mixture − target instrument`
-- **Synthetic data:** mixtures built on-the-fly from isolated target instrument recordings + target instrument-free backgrounds
+- **Single-target, two-source design:** `['<instrument>', 'other']` where `other = mixture − instrument`
+- **Synthetic data:** mixtures built on-the-fly from isolated instrument recordings + instrument-free backgrounds
 - **Warm-start from pretrained htdemucs:** transfers learned audio representations; reinitializes output head (4→2 sources)
 
 ## Where to go next

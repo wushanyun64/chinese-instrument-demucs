@@ -24,7 +24,7 @@ shape-mismatched keys, logs which ones were skipped.
 
 **Cause:** Background audio contains target instrument, teaching the model target instrument belongs in `other`.
 
-**Fix:** Run `data_pipeline/validate_target instrument_free.py` on your backgrounds and remove flagged files.
+**Fix:** Run `data_pipeline/validate_contamination.py` on your backgrounds and remove flagged files.
 
 ## Overfitting to narrow target instrument data
 
