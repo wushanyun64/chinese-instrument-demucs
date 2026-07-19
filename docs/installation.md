@@ -1,5 +1,11 @@
 # Installation
 
+## Google Colab (no setup required)
+
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/wushanyun64/chinese-instrument-demucs/blob/main/colab/chinese_instrument_demucs.ipynb)
+
+Run inference directly in your browser with a free T4 GPU — nothing to install.
+
 ## Prerequisites
 
 - NVIDIA GPU with CUDA 11.8+

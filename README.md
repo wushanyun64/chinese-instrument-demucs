@@ -1,5 +1,7 @@
 # Chinese Instrument Stem Separator (Demucs)
 
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/wushanyun64/chinese-instrument-demucs/blob/main/colab/chinese_instrument_demucs.ipynb)
+
 A **single-target source separator** based on Demucs that isolates any Chinese
 instrument (erhu, pipa, dizi, etc.) from arbitrary music mixtures.
 
@@ -44,6 +46,12 @@ uv run mkdocs serve
 ## Documentation
 
 Full docs at [docs/index.md](docs/index.md) or run `uv run mkdocs serve`.
+
+## Google Colab
+
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/wushanyun64/chinese-instrument-demucs/blob/main/colab/chinese_instrument_demucs.ipynb)
+
+Click the badge above to run inference in your browser — no local setup needed.
 
 ## License
 
