@@ -3,6 +3,8 @@ data/
 outputs/
 release_models/
 metadata/
+finetune_data/*
+!finetune_data/.gitkeep
 
 # Dora experiment outputs
 outputs/
