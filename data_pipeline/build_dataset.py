@@ -76,7 +76,7 @@ def build_track(
     seg_samples: int,
     snr_db: float,
     source_name: str = "chinese-instrument",
-    augment_source: bool = True,
+    augment_source: bool = False,
     augment_bg: bool = False,
     source_gain_db: float = -20.0,
     bg_gain_db: float = -20.0,
