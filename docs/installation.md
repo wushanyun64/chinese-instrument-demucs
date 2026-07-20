@@ -14,12 +14,12 @@ Run inference directly in your browser with a free T4 GPU — nothing to install
 ## Setup
 
 ```bash
-# Create environment + install all dependencies
-uv sync
+# Create environment + install all dependencies (including dev tools)
+uv sync --extra dev
 
 # Verify
-uv run --env PYTHONPATH=vendor/demucs python -c "import torch; print('CUDA available:', torch.cuda.is_available())"
-uv run --env PYTHONPATH=vendor/demucs python -c "import demucs; print('demucs import OK')"
+uv run python -c "import torch; print('CUDA available:', torch.cuda.is_available())"
+uv run python -c "import demucs; print('demucs import OK')"
 ```
 
 Expected output:
@@ -28,16 +28,14 @@ CUDA available: True
 demucs import OK
 ```
 
-## Vendored Demucs
+## Demucs
 
-This repo vendors `facebookresearch/demucs` (archived 2025-01-01) directly in `vendor/demucs/`.
-It is imported as a local package; no separate `pip install demucs` is needed.
+This project uses the official [adefossez/demucs](https://github.com/adefossez/demucs) package
+from PyPI. Training, inference, and evaluation all work with `pip install "demucs[train]"` —
+no vendored copy needed. The `[train]` extra pulls in Dora, Hydra, and all training dependencies.
 
-Commands that need demucs must set `PYTHONPATH=vendor/demucs`:
-
-```bash
-uv run --env PYTHONPATH=vendor/demucs python ...
-```
+Dora base configs are mirrored locally at `configs/demucs_base/` since the pip wheel doesn't
+ship the `conf/` directory.
 
 ## Optional: Makefile
 

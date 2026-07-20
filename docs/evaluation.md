@@ -8,7 +8,7 @@ genuine songs with Chinese instrument, not synthetic data.
 ## Running
 
 ```bash
-uv run --env PYTHONPATH=vendor/demucs python eval/evaluate.py --test-dir data/real_test/ --sig <SIG>
+uv run python eval/evaluate.py --test-dir data/real_test/ --sig <SIG>
 ```
 
 Prints per-track and mean instrument-stem SDR.

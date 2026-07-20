@@ -20,24 +20,24 @@ Takes any song → outputs an isolated instrument track.
 
 ```bash
 # 1. Create environment + install
-uv sync
+uv sync --extra dev
 
 # 2. Build synthetic dataset (e.g. for erhu)
-uv run --env PYTHONPATH=vendor/demucs python data_pipeline/build_dataset.py \
+uv run python data_pipeline/build_dataset.py \
     --source-dir erhu_clips/ --bg-dir backgrounds/ --source-name erhu
 
 # 3. Train
 bash training/train.sh
 
 # 4. Separate
-uv run --env PYTHONPATH=vendor/demucs python inference/separate.py input.wav --sig <SIG> --stem erhu
+uv run python inference/separate.py input.wav --sig <SIG> --stem erhu
 ```
 
 ## Useful commands
 
 ```bash
 # Run tests
-uv run --env PYTHONPATH=vendor/demucs pytest
+uv run pytest
 
 # Build docs
 uv run mkdocs serve
