@@ -9,16 +9,11 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 from pathlib import Path
 
 import numpy as np
 import soundfile as sf
 import torch
-
-_VENDOR = Path(__file__).resolve().parents[1] / "vendor" / "demucs"
-if str(_VENDOR) not in sys.path:
-    sys.path.insert(0, str(_VENDOR))
 
 
 def si_sdr(estimated: torch.Tensor, reference: torch.Tensor) -> float:

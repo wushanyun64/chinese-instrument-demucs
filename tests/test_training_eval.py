@@ -4,15 +4,9 @@ These tests mock out model downloads (network access) and use
 small in-memory tensors where possible.
 """
 
-import sys
-from pathlib import Path
-
 import pytest
+from pathlib import Path
 import torch
-
-VENDOR = Path(__file__).resolve().parents[1] / "vendor" / "demucs"
-if str(VENDOR) not in sys.path:
-    sys.path.insert(0, str(VENDOR))
 
 
 # ---------------------------------------------------------------------------

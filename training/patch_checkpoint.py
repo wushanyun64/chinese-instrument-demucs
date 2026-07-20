@@ -13,18 +13,12 @@ Usage::
 from __future__ import annotations
 
 import argparse
-import sys
 from pathlib import Path
 
 import torch
 
-# Ensure vendored demucs is importable
-_VENDOR = Path(__file__).resolve().parents[1] / "vendor" / "demucs"
-if str(_VENDOR) not in sys.path:
-    sys.path.insert(0, str(_VENDOR))
-
-from demucs.htdemucs import HTDemucs  # noqa: E402
-from demucs.pretrained import get_model  # noqa: E402
+from demucs.htdemucs import HTDemucs
+from demucs.pretrained import get_model
 
 
 def build_model(sources: list[str], **kwargs) -> HTDemucs:

@@ -3,42 +3,42 @@
 UV := uv
 
 # ---- Primary workflow: use uv directly ----
-#    uv sync                        # create env + install
-#    uv run --env PYTHONPATH=vendor/demucs pytest
-#    uv run --env PYTHONPATH=vendor/demucs python data_pipeline/build_dataset.py ...
+#    uv sync --extra dev           # create env + install all deps
+#    uv run pytest
+#    uv run python data_pipeline/build_dataset.py ...
 #    bash training/train.sh
-#    uv run --env PYTHONPATH=vendor/demucs python inference/separate.py ...
+#    uv run python inference/separate.py ...
 #
 # These Makefile targets are convenience wrappers.
 
 env:
-	$(UV) sync
-	@echo "Ready — use: uv run --env PYTHONPATH=vendor/demucs ..."
+	$(UV) sync --extra dev
+	@echo "Ready — use: uv run python ..."
 
 env-verify:
-	$(UV) run --env PYTHONPATH=vendor/demucs python -c "import torch; print('CUDA:', torch.cuda.is_available())"
-	$(UV) run --env PYTHONPATH=vendor/demucs python -c "import demucs; print('demucs OK')"
+	$(UV) run python -c "import torch; print('CUDA:', torch.cuda.is_available())"
+	$(UV) run python -c "import demucs; print('demucs OK')"
 
 build-data:
-	$(UV) run --env PYTHONPATH=vendor/demucs python data_pipeline/build_dataset.py
+	$(UV) run python data_pipeline/build_dataset.py
 
 validate-data:
-	$(UV) run --env PYTHONPATH=vendor/demucs python data_pipeline/validate_contamination.py backgrounds/
+	$(UV) run python data_pipeline/validate_contamination.py backgrounds/
 
 train:
 	bash training/train.sh
 
 separate:
-	$(UV) run --env PYTHONPATH=vendor/demucs python inference/separate.py
+	$(UV) run python inference/separate.py
 
 eval:
-	$(UV) run --env PYTHONPATH=vendor/demucs python eval/evaluate.py
+	$(UV) run python eval/evaluate.py
 
 test:
-	$(UV) run --env PYTHONPATH=vendor/demucs pytest tests/ -v
+	$(UV) run pytest tests/ -v
 
 notebooks:
-	$(UV) run --env PYTHONPATH=vendor/demucs pytest --nbmake notebooks/ -v
+	$(UV) run pytest --nbmake notebooks/ -v
 
 docs:
 	$(UV) run mkdocs build --strict
