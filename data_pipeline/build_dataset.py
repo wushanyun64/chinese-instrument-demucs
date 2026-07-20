@@ -76,7 +76,7 @@ def build_track(
     seg_samples: int,
     snr_db: float,
     source_name: str = "chinese-instrument",
-    augment_source: bool = False,
+    augment_source: bool = True,
     augment_bg: bool = False,
     source_gain_db: float = -20.0,
     bg_gain_db: float = -20.0,
@@ -176,6 +176,8 @@ def build_dataset(
     snr_max: float = 10.0,
     source_gain_db: float = -20.0,
     bg_gain_db: float = -20.0,
+    augment_source: bool = True,
+    augment_bg: bool = False,
     seed: int = 42,
 ) -> None:
     """Main synthesis entry-point.
@@ -239,6 +241,8 @@ def build_dataset(
                 source_name=source_name,
                 source_gain_db=source_gain_db,
                 bg_gain_db=bg_gain_db,
+                augment_source=augment_source,
+                augment_bg=augment_bg,
             )
 
             # Write stems
@@ -265,6 +269,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--snr-max", default=10.0, type=float)
     p.add_argument("--source-gain-db", default=-20.0, type=float)
     p.add_argument("--bg-gain-db", default=-20.0, type=float)
+    p.add_argument("--no-augment", action="store_true",
+                   help="Disable source augmentation (pitch/time/gain)")
     p.add_argument("--seed", default=42, type=int)
     return p.parse_args(argv)
 
@@ -283,5 +289,6 @@ if __name__ == "__main__":
         snr_max=args.snr_max,
         source_gain_db=args.source_gain_db,
         bg_gain_db=args.bg_gain_db,
+        augment_source=not args.no_augment,
         seed=args.seed,
     )
