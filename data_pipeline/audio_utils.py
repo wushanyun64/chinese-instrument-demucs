@@ -33,6 +33,42 @@ def load_audio(path: str | Path, target_sr: int = SAMPLE_RATE) -> torch.Tensor:
     return wav
 
 
+def get_audio_info(path: str | Path) -> tuple[int, int]:
+    """Return ``(sample_rate, total_frames)`` without loading audio data."""
+    info = sf.info(str(path))
+    return info.samplerate, info.frames
+
+
+def load_audio_segment(
+    path: str | Path,
+    offset: int = 0,
+    frames: int | None = None,
+    target_sr: int = SAMPLE_RATE,
+) -> torch.Tensor:
+    """Load a slice of an audio file.
+
+    Parameters
+    ----------
+    path : Path
+        Audio file.
+    offset : int
+        Start frame (0-indexed) in the file's native sample rate.
+    frames : int | None
+        Number of frames to read.  ``None`` = read to end.
+    target_sr : int
+        Resample to this rate (default 44.1 kHz).
+
+    Returns
+    -------
+    ``(channels, samples)`` float tensor.
+    """
+    data, sr = sf.read(str(path), start=offset, stop=None if frames is None else offset + frames)
+    wav = torch.from_numpy(data.T).float()
+    if sr != target_sr:
+        wav = julius.resample_frac(wav, sr, target_sr)
+    return wav
+
+
 def save_audio(wav: torch.Tensor, path: str | Path, sr: int = SAMPLE_RATE) -> None:
     """Save a ``(channels, samples)`` float tensor to a WAV file (FLOAT subtype)."""
     sf.write(str(path), wav.cpu().numpy().T, sr, subtype="FLOAT")

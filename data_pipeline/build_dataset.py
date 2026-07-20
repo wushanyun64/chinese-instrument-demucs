@@ -44,7 +44,9 @@ from data_pipeline.audio_utils import (
     SAMPLE_RATE,
     ensure_length,
     ensure_stereo,
+    get_audio_info,
     load_audio,
+    load_audio_segment,
     loudness_normalize,
     mix_at_snr,
     pitch_shift,
@@ -103,20 +105,33 @@ def build_track(
     dict with keys ``source_name``, ``"other"``, ``"mixture"`` —
     each a ``(2, seg_samples)`` float tensor.
     """
-    # Load & normalize format
-    source = ensure_stereo(load_audio(source_file))
-    bg = ensure_stereo(load_audio(bg_file))
+    # Probe durations without loading audio data
+    src_sr, src_frames = get_audio_info(source_file)
+    bg_sr, bg_frames = get_audio_info(bg_file)
 
-    # Take a random common-length segment
-    min_len = min(source.size(-1), bg.size(-1))
+    # Convert to target sample rate to determine available segment windows
+    src_len = int(src_frames * SAMPLE_RATE / src_sr)
+    bg_len = int(bg_frames * SAMPLE_RATE / bg_sr)
+
+    # Pick a random start offset and load only the segment needed
+    min_len = min(src_len, bg_len)
     if min_len < seg_samples:
-        source = ensure_length(source, seg_samples)
-        bg = ensure_length(bg, seg_samples)
-        start_frame = 0
+        # Clip(s) too short — load full file and loop-pad
+        source = ensure_stereo(load_audio(source_file))
+        bg = ensure_stereo(load_audio(bg_file))
     else:
         start_frame = random.randint(0, min_len - seg_samples)
-        source = source[:, start_frame : start_frame + seg_samples]
-        bg = bg[:, start_frame : start_frame + seg_samples]
+        # Convert frame offset back to each file's native sample rate
+        src_offset = int(start_frame * src_sr / SAMPLE_RATE)
+        bg_offset = int(start_frame * bg_sr / SAMPLE_RATE)
+        src_seg_frames = int(seg_samples * src_sr / SAMPLE_RATE)
+        bg_seg_frames = int(seg_samples * bg_sr / SAMPLE_RATE)
+        source = ensure_stereo(load_audio_segment(source_file, offset=src_offset, frames=src_seg_frames))
+        bg = ensure_stereo(load_audio_segment(bg_file, offset=bg_offset, frames=bg_seg_frames))
+
+    # Trim to exact length
+    source = ensure_length(source, seg_samples)
+    bg = ensure_length(bg, seg_samples)
 
     # Loudness normalize each to a consistent reference
     source = loudness_normalize(source, target_db=source_gain_db)
