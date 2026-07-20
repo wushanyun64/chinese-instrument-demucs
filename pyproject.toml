@@ -14,13 +14,9 @@ dependencies = [
     "torchaudio>=2.0",
     "soundfile>=0.12",
     "numpy",
-    # Demucs vendored dependencies
-    "dora-search",
-    "hydra-core",
-    "omegaconf",
+    "demucs[train]>=4.1.0",
+    # Used directly by data_pipeline
     "julius",
-    "openunmix",
-    "einops",
     # Evaluation / analysis
     "museval>=0.4",
 ]
