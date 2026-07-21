@@ -49,10 +49,7 @@ from data_pipeline.audio_utils import (
     load_audio_segment,
     loudness_normalize,
     mix_at_snr,
-    pitch_shift,
-    random_gain,
     save_audio,
-    time_stretch,
 )
 
 
@@ -76,8 +73,6 @@ def build_track(
     seg_samples: int,
     snr_db: float,
     source_name: str = "chinese-instrument",
-    augment_source: bool = True,
-    augment_bg: bool = False,
     source_gain_db: float = -20.0,
     bg_gain_db: float = -20.0,
 ) -> dict[str, torch.Tensor]:
@@ -95,8 +90,6 @@ def build_track(
         Target SNR (positive = source louder).
     source_name : str
         Name of the target instrument (used as stem filename).
-    augment_source, augment_bg : bool
-        Whether to apply light pitch/time/gain augmentation.
     source_gain_db, bg_gain_db : float
         Reference loudness targets before mixing.
 
@@ -137,19 +130,6 @@ def build_track(
     source = loudness_normalize(source, target_db=source_gain_db)
     bg = loudness_normalize(bg, target_db=bg_gain_db)
 
-    # Light augmentation (Demucs does heavier remix at train time)
-    if augment_source:
-        source = pitch_shift(source, n_steps=random.choice([0, 0, 0, -2, 2]))
-        if random.random() < 0.3:
-            source = time_stretch(source, rate=random.uniform(0.9, 1.1))
-        source = random_gain(source, db_range=(-3.0, 3.0))
-    if augment_bg:
-        bg = random_gain(bg, db_range=(-3.0, 3.0))
-
-    # Ensure common length after augmentation
-    source = ensure_length(source, seg_samples)
-    bg = ensure_length(bg, seg_samples)
-
     # Mix
     mixture = mix_at_snr(source, bg, snr_db)
 
@@ -176,8 +156,6 @@ def build_dataset(
     snr_max: float = 10.0,
     source_gain_db: float = -20.0,
     bg_gain_db: float = -20.0,
-    augment_source: bool = True,
-    augment_bg: bool = False,
     seed: int = 42,
 ) -> None:
     """Main synthesis entry-point.
@@ -241,8 +219,6 @@ def build_dataset(
                 source_name=source_name,
                 source_gain_db=source_gain_db,
                 bg_gain_db=bg_gain_db,
-                augment_source=augment_source,
-                augment_bg=augment_bg,
             )
 
             # Write stems
@@ -269,8 +245,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--snr-max", default=10.0, type=float)
     p.add_argument("--source-gain-db", default=-20.0, type=float)
     p.add_argument("--bg-gain-db", default=-20.0, type=float)
-    p.add_argument("--no-augment", action="store_true",
-                   help="Disable source augmentation (pitch/time/gain)")
     p.add_argument("--seed", default=42, type=int)
     return p.parse_args(argv)
 
@@ -289,6 +263,5 @@ if __name__ == "__main__":
         snr_max=args.snr_max,
         source_gain_db=args.source_gain_db,
         bg_gain_db=args.bg_gain_db,
-        augment_source=not args.no_augment,
         seed=args.seed,
     )

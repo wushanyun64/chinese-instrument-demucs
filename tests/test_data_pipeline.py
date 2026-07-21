@@ -13,10 +13,7 @@ from data_pipeline.audio_utils import (
     ensure_stereo,
     loudness_normalize,
     mix_at_snr,
-    pitch_shift,
-    random_gain,
     rms,
-    time_stretch,
 )
 from data_pipeline.build_dataset import build_dataset, build_track
 from data_pipeline.validate_contamination import _instrument_band_ratio, validate
@@ -125,42 +122,6 @@ class TestMixAtSNR:
         assert 0.05 < ratio.item() < 0.2
 
 
-class TestPitchShift:
-    def test_no_shift_identity(self):
-        wav = torch.randn(2, 1000)
-        out = pitch_shift(wav, n_steps=0)
-        assert torch.allclose(out, wav)
-
-    def test_shift_preserves_length(self):
-        wav = torch.randn(2, SAMPLE_RATE)
-        out = pitch_shift(wav, n_steps=3)
-        assert out.size(-1) == SAMPLE_RATE
-
-
-class TestTimeStretch:
-    def test_no_stretch_identity(self):
-        wav = torch.randn(2, 1000)
-        out = time_stretch(wav, rate=1.0)
-        assert torch.allclose(out, wav)
-
-    def test_stretch_changes_length(self):
-        wav = torch.randn(2, SAMPLE_RATE)
-        out = time_stretch(wav, rate=0.5)
-        assert out.size(-1) == SAMPLE_RATE * 2
-
-
-class TestRandomGain:
-    def test_amplitude_change(self):
-        wav = torch.ones(2, 1000)
-        out = random_gain(wav, db_range=(0.0, 0.0))
-        assert torch.allclose(out, wav)
-
-    def test_range(self):
-        wav = torch.ones(2, 1000)
-        out = random_gain(wav, db_range=(-6.0, 6.0))
-        assert not torch.allclose(out, wav) or abs(out.mean()) > 0
-
-
 # ---------------------------------------------------------------------------
 # build_track tests
 # ---------------------------------------------------------------------------
@@ -178,7 +139,6 @@ class TestBuildTrack:
         stems = build_track(
             source_file, bg_file,
             seg_samples=seg_samples, snr_db=5.0,
-            augment_source=False, augment_bg=False,
         )
 
         mixture = stems["mixture"]
@@ -197,7 +157,6 @@ class TestBuildTrack:
         stems = build_track(
             source_file, bg_file,
             seg_samples=SAMPLE_RATE, snr_db=0.0,
-            augment_source=False, augment_bg=False,
         )
         for name in ("mixture", "chinese-instrument", "other"):
             assert stems[name].size(0) == 2, f"{name} not stereo"

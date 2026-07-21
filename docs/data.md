@@ -35,8 +35,10 @@ All audio: **44.1 kHz, stereo, float**.
 See `data_pipeline/build_dataset.py` for the full pipeline. Key steps:
 1. Sample instrument + background clips; take a common-length segment (7–11 s)
 2. Loudness-normalize each, then mix at randomized SNR (−5 to +10 dB)
-3. Apply light augmentation (pitch shift, time stretch, random gain)
-4. Write `<instrument>.wav`, `other.wav`, `mixture.wav = instrument + other`
+3. Write `<instrument>.wav`, `other.wav`, `mixture.wav = instrument + other`
+
+Augmentation (remix/shift/pitch/gain) is applied by Demucs at train time
+(see `configs/variant/instrument_ft.yaml`), not baked into the dataset.
 
 ## Guardrails
 

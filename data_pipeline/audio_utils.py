@@ -1,7 +1,7 @@
 """Audio utilities for the training dataset synthesis pipeline.
 
-Provides loudness normalization, resampling, stereo upmixing, SNR-based
-mixing, and light augmentation — all operating on torch tensors at 44.1 kHz."""
+Provides loudness normalization, resampling, stereo upmixing, and SNR-based
+mixing — all operating on torch tensors at 44.1 kHz."""
 
 from __future__ import annotations
 
@@ -9,7 +9,6 @@ import math
 from pathlib import Path
 
 import julius
-import numpy as np
 import soundfile as sf
 import torch
 
@@ -153,42 +152,3 @@ def mix_at_snr(
     a_squared = p_signal / (p_noise * (10 ** (snr_db / 10.0)))
     scale = a_squared.sqrt()
     return signal + scale * other
-
-
-# ---------------------------------------------------------------------------
-# Light augmentation (per the plan: modest, Demucs does heavier remix later)
-# ---------------------------------------------------------------------------
-
-def pitch_shift(wav: torch.Tensor, n_steps: int = 0) -> torch.Tensor:
-    """Pitch-shift by *n_steps* semitones using julius.
-
-    Zero-pads the signal before resampling to avoid boundary artifacts;
-    trims back to the original length afterwards.
-    """
-    if n_steps == 0:
-        return wav
-    rate = 2 ** (-n_steps / 12.0)
-    # pad to avoid boundary clipping
-    pad = int(0.1 * wav.size(-1))
-    padded = torch.nn.functional.pad(wav, (pad, pad))
-    shifted = julius.resample_frac(padded, int(SAMPLE_RATE * rate), SAMPLE_RATE)
-    start = int(pad * rate)
-    end = start + wav.size(-1)
-    return shifted[..., start:end]
-
-
-def time_stretch(wav: torch.Tensor, rate: float = 1.0) -> torch.Tensor:
-    """Time-stretch by *rate* (1.0 = no change) using julius resample."""
-    if rate == 1.0:
-        return wav
-    stretched = julius.resample_frac(
-        wav, int(SAMPLE_RATE * rate), SAMPLE_RATE
-    )
-    return stretched
-
-
-def random_gain(wav: torch.Tensor, db_range: tuple[float, float] = (-6.0, 6.0)) -> torch.Tensor:
-    """Apply a uniform-random gain within *db_range* (min, max) dB."""
-    lo, hi = db_range
-    db = float(torch.empty(1).uniform_(lo, hi))
-    return wav * (10 ** (db / 20.0))
